@@ -1,0 +1,65 @@
+import random
+import pandas as pd
+
+def recommend_music(sentiment, df):
+    """Recommends a song based on the given sentiment."""
+    filtered_df = df[df['Sentiment_Label'].str.lower() == sentiment.lower()]
+    if filtered_df.empty:
+        return "No songs found for this sentiment. Try another one."
+    
+    song = filtered_df.sample(1).iloc[0]
+    return {
+        "Song": song["Song_Name"],
+        "Artist": song["Artist"],
+        "Genre": song["Genre"],
+        "Mood": song["Mood"],
+        "Energy": song["Energy"],
+        "Danceability": song["Danceability"]
+    }
+
+def change_sentiment(new_sentiment, df):
+    """Allows user to change sentiment and get a new recommendation."""
+    return recommend_music(new_sentiment, df)
+
+def get_available_sentiments(df):
+    """Returns a list of unique sentiments in the dataset."""
+    return df['Sentiment_Label'].unique().tolist()
+
+def display_recommendation(recommendation):
+    """Formats and displays the song recommendation."""
+    if isinstance(recommendation, str):
+        print(recommendation)
+    else:
+        print("\nRecommended Song:")
+        print(f"  🎵 Song: {recommendation['Song']}")
+        print(f"  🎤 Artist: {recommendation['Artist']}")
+        print(f"  🎶 Genre: {recommendation['Genre']}")
+        print(f"  😌 Mood: {recommendation['Mood']}")
+        print(f"  ⚡ Energy: {recommendation['Energy']}")
+        print(f"  💃 Danceability: {recommendation['Danceability']}")
+
+def main():
+    """Main function to interact with the user."""
+    file_path = "/mnt/data/music_sentiment_dataset.csv"
+    df = pd.read_csv(file_path)
+    
+    sentiments = get_available_sentiments(df)
+    print("Available Sentiments:", ", ".join(sentiments))
+    
+    while True:
+        sentiment = input("Enter a sentiment to get a music recommendation: ").strip()
+        if sentiment.lower() not in [s.lower() for s in sentiments]:
+            print("Invalid sentiment. Please choose from the available options.")
+            continue
+        
+        recommendation = recommend_music(sentiment, df)
+        display_recommendation(recommendation)
+        
+        change = input("Do you want to change the sentiment? (yes/no): ").strip().lower()
+        if change != "yes":
+            break
+    
+    print("\n🎵 Thank you for using the Music Recommender! 🎧")
+
+if __name__ == "__main__":
+    main()
